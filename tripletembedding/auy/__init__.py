@@ -1,2 +1,2 @@
-from tripletembedding.aux.logger import load_snapshot
-from tripletembedding.aux.logger import Logger
+from tripletembedding.auy.logger import load_snapshot
+from tripletembedding.auy.logger import Logger
