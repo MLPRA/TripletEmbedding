@@ -1,4 +1,5 @@
 import chainer
+import numpy as np
 from chainer import functions as F
 
 from tripletembedding.functions import mse_zero_one
@@ -13,14 +14,14 @@ class TripletNet(chainer.Chain):
     The CNN to be used is supplied as an argument to the constructor.
     """
 
-    def __init__(self, cnn):
+    def __init__(self, cnn, kwargs):
         super(TripletNet, self).__init__(
-            cnn=cnn(),
+            cnn=cnn(**kwargs)
         )
 
     def clean(self):
         self.cnn.zerograds()
-        self.zerograds()
+        self.cleargrads()
 
     def _accuracy(self, dist_pos, dist_neg):
         """
@@ -45,8 +46,8 @@ class TripletNet(chainer.Chain):
 
     def embed(self, x):
         """Forward through the CNN"""
-        h = self.cnn(x)
-        h = F.reshape(h, (h.data.shape[0], h.data.shape[1]))
+        h = self.cnn(x, layers=['res5'])['res5']
+        # h = F.reshape(h, (h.data.shape[0], h.data.shape[1]))
         return h
 
     def l2norm(self, x):
@@ -59,7 +60,7 @@ class TripletNet(chainer.Chain):
         However it did not work out for me very well, so this function is
         currently not used.
         """
-        return F.local_response_normalization(x, n=x.data.shape[1]*2,
+        return F.local_response_normalization(x, n=x.data.shape[1] * 2,
                                               k=0, alpha=1, beta=0.5)
 
     def squared_distance(self, anc, pos, neg):
